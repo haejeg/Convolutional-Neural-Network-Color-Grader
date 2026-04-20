@@ -2,14 +2,14 @@
 infer.py — Run the trained U-Net model on new images.
 
 HOW TO USE:
-  # Retouch a single image:
-  python infer.py --input path/to/photo.jpg --output results/retouched.jpg
+  # Retouch an image inside the 'Input' folder (outputs to 'results'):
+  python infer.py photo.jpg
 
-  # Retouch all images in a folder:
-  python infer.py --input path/to/folder/ --output results/
+  # Retouch all images in the 'Input' folder:
+  python infer.py
 
-  # Use a specific checkpoint (default: checkpoints/best.pth):
-  python infer.py --input photo.jpg --output out.jpg --checkpoint checkpoints/last.pth
+  # Use a specific output folder and checkpoint:
+  python infer.py photo.jpg --output other_results/ --checkpoint checkpoints/last.pth
 
 The model was trained on 384x384 crops, but at inference we want to process
 the full image at its original resolution. We do this by:
@@ -34,10 +34,12 @@ from src.utils import get_device, tensor_to_pil
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Run photo retouching inference")
-    parser.add_argument("--input", type=str, required=True,
-                        help="Input image path or directory of images")
-    parser.add_argument("--output", type=str, required=True,
-                        help="Output image path or directory")
+    parser.add_argument("image_name", type=str, nargs="?", default=None,
+                        help="Input image name (e.g., 'hi.jpg') in the 'Input' folder. Leave blank to process the whole folder.")
+    parser.add_argument("--input", type=str, default=None,
+                        help="Alternative way to provide input image name or path")
+    parser.add_argument("--output", type=str, default="results",
+                        help="Output image path or directory (defaults to 'results')")
     parser.add_argument("--checkpoint", type=str, default="checkpoints/best.pth",
                         help="Path to model checkpoint (default: checkpoints/best.pth)")
     parser.add_argument("--device", type=str, default=None,
@@ -182,7 +184,17 @@ def main():
 
     model = load_model(args.checkpoint, device)
 
-    input_path = Path(args.input)
+    input_given = args.image_name or args.input
+    if input_given:
+        input_path = Path(input_given)
+        if not input_path.exists() and (Path("Input") / input_given).exists():
+            input_path = Path("Input") / input_given
+        elif not input_path.exists() and not input_path.is_absolute():
+            input_path = Path("Input") / input_given
+    else:
+        # Default to processing the whole 'Input' directory
+        input_path = Path("Input")
+
     output_path = Path(args.output)
 
     # Supported image formats

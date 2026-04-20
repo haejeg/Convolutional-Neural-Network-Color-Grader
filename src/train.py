@@ -41,12 +41,14 @@ from src.utils import get_device, save_comparison_grid, set_seed
 def parse_args():
     parser = argparse.ArgumentParser(description="Train the U-Net retouching model")
     parser.add_argument("--data_dir", type=str,
-                        default="data/archive/fivek_512px",
-                        help="Path to dataset directory (containing input/ and expertC_gt/)")
+                        default="Data",
+                        help="Path to dataset directory (containing Original/ and ExpertC/)")
     parser.add_argument("--epochs", type=int, default=100,
                         help="Total number of training epochs")
     parser.add_argument("--batch_size", type=int, default=8,
                         help="Batch size (reduce to 4 if you get out-of-memory errors)")
+    parser.add_argument("--limit", type=int, default=None,
+                        help="Limit the total number of image pairs to process (useful for quick testing)")
     parser.add_argument("--lr", type=float, default=1e-4,
                         help="Learning rate for Adam optimizer")
     parser.add_argument("--crop_size", type=int, default=384,
@@ -186,15 +188,24 @@ def main():
     # ------------------------------------------------------------------
     repo_root = Path(__file__).parent.parent
     data_dir = repo_root / args.data_dir
-    input_dir = data_dir / "input"
-    gt_dir = data_dir / "expertC_gt"
+    input_dir = data_dir / "Original"
+    gt_dir = data_dir / "ExpertC"
 
     if not input_dir.exists() or not gt_dir.exists():
         print(f"ERROR: Dataset not found at {data_dir}")
-        print("Expected subdirectories: input/ and expertC_gt/")
+        print("Expected subdirectories: Original/ and ExpertC/")
         sys.exit(1)
 
     train_pairs, val_pairs = make_splits(str(input_dir), str(gt_dir))
+
+    if args.limit is not None:
+        all_pairs = val_pairs + train_pairs
+        if len(all_pairs) > args.limit:
+            all_pairs = all_pairs[:args.limit]
+            n_val = max(1, int(len(all_pairs) * 0.1))
+            val_pairs = all_pairs[:n_val]
+            train_pairs = all_pairs[n_val:]
+            print(f"Limiting dataset to: {len(train_pairs)} training, {len(val_pairs)} validation pairs")
 
     train_ds = FiveKDataset(train_pairs, split="train", crop_size=args.crop_size)
     val_ds = FiveKDataset(val_pairs, split="val", crop_size=args.crop_size)
