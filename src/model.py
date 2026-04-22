@@ -195,6 +195,47 @@ def count_parameters(model: nn.Module) -> int:
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
+class PatchDiscriminator(nn.Module):
+    """
+    PatchGAN discriminator for paired image-to-image translation.
+    Outputs a matrix of patch-level true/false predictions instead of a single scalar.
+    This encourages the generator to produce high-frequency details (sharp textures).
+    """
+    def __init__(self, in_channels: int = 6, base_channels: int = 64):
+        # in_channels is 6 because we concatenate input (3) + target/pred (3)
+        super().__init__()
+        
+        self.model = nn.Sequential(
+            # Input: (6, H, W) -> (64, H/2, W/2)
+            nn.Conv2d(in_channels, base_channels, kernel_size=4, stride=2, padding=1),
+            nn.LeakyReLU(0.2, inplace=True),
+            
+            # (64, H/2, W/2) -> (128, H/4, W/4)
+            nn.Conv2d(base_channels, base_channels * 2, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(base_channels * 2),
+            nn.LeakyReLU(0.2, inplace=True),
+            
+            # (128, H/4, W/4) -> (256, H/8, W/8)
+            nn.Conv2d(base_channels * 2, base_channels * 4, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(base_channels * 4),
+            nn.LeakyReLU(0.2, inplace=True),
+            
+            # (256, H/8, W/8) -> (512, H/8, W/8) - stride is 1 here!
+            nn.Conv2d(base_channels * 4, base_channels * 8, kernel_size=4, stride=1, padding=1, bias=False),
+            nn.BatchNorm2d(base_channels * 8),
+            nn.LeakyReLU(0.2, inplace=True),
+            
+            # Output: (1, H/8, W/8)
+            nn.Conv2d(base_channels * 8, 1, kernel_size=4, stride=1, padding=1)
+            # We don't use Sigmoid here because we will use MSELoss (LSGAN) or BCEWithLogitsLoss
+        )
+
+    def forward(self, input_img: torch.Tensor, target_img: torch.Tensor) -> torch.Tensor:
+        # Concatenate along channel dimension
+        x = torch.cat([input_img, target_img], dim=1)
+        return self.model(x)
+
+
 # ---------------------------------------------------------------------------
 # Quick test — run this file directly to verify the model works:
 #   python src/model.py
