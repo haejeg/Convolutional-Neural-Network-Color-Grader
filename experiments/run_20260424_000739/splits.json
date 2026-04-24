@@ -1,0 +1,510 @@
+{
+  "seed": 42,
+  "data_dir": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data",
+  "train": [
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1705-_DGW6349.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1705-_DGW6349.png",
+      "stem": "a1705-_DGW6349"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1294-IMG_0080.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1294-IMG_0080.png",
+      "stem": "a1294-IMG_0080"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1382-MB_070908_022.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1382-MB_070908_022.png",
+      "stem": "a1382-MB_070908_022"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a3429-IMG_0036.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a3429-IMG_0036.png",
+      "stem": "a3429-IMG_0036"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a2831-_MG_3139.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a2831-_MG_3139.png",
+      "stem": "a2831-_MG_3139"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1124-IMG_4242.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1124-IMG_4242.png",
+      "stem": "a1124-IMG_4242"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1581-20060507_115629__E6B1096.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1581-20060507_115629__E6B1096.png",
+      "stem": "a1581-20060507_115629__E6B1096"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4512-09-05-19-at-18h43m31s-_MG_9546.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4512-09-05-19-at-18h43m31s-_MG_9546.png",
+      "stem": "a4512-09-05-19-at-18h43m31s-_MG_9546"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a3042-kme_092.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a3042-kme_092.png",
+      "stem": "a3042-kme_092"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4254-DSC_0066.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4254-DSC_0066.png",
+      "stem": "a4254-DSC_0066"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a3177-07-11-17-at-08h19m16s-_MG_4757.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a3177-07-11-17-at-08h19m16s-_MG_4757.png",
+      "stem": "a3177-07-11-17-at-08h19m16s-_MG_4757"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a0413-MB_20050123_033.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a0413-MB_20050123_033.png",
+      "stem": "a0413-MB_20050123_033"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1939-kme_301.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1939-kme_301.png",
+      "stem": "a1939-kme_301"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1920-IMG_4166.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1920-IMG_4166.png",
+      "stem": "a1920-IMG_4166"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1461-NKIM_MG_3096.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1461-NKIM_MG_3096.png",
+      "stem": "a1461-NKIM_MG_3096"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a0041-IMG_4972.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a0041-IMG_4972.png",
+      "stem": "a0041-IMG_4972"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1070-_MG_6547.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1070-_MG_6547.png",
+      "stem": "a1070-_MG_6547"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a2219-kme_208.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a2219-kme_208.png",
+      "stem": "a2219-kme_208"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4924-_DSC0021-2.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4924-_DSC0021-2.png",
+      "stem": "a4924-_DSC0021-2"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a0185-07-07-06-at-20h08m44s-_MG_2130.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a0185-07-07-06-at-20h08m44s-_MG_2130.png",
+      "stem": "a0185-07-07-06-at-20h08m44s-_MG_2130"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4698-09-05-17-at-20h52m53s-_MG_9266.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4698-09-05-17-at-20h52m53s-_MG_9266.png",
+      "stem": "a4698-09-05-17-at-20h52m53s-_MG_9266"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1005-kme_318.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1005-kme_318.png",
+      "stem": "a1005-kme_318"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4189-IMG_2752.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4189-IMG_2752.png",
+      "stem": "a4189-IMG_2752"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a3772-dgw_123.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a3772-dgw_123.png",
+      "stem": "a3772-dgw_123"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1009-jmac_MG_7831.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1009-jmac_MG_7831.png",
+      "stem": "a1009-jmac_MG_7831"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4888-Duggan_081024_2295.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4888-Duggan_081024_2295.png",
+      "stem": "a4888-Duggan_081024_2295"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a2952-dvf_108.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a2952-dvf_108.png",
+      "stem": "a2952-dvf_108"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4225-Duggan_081109_3031.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4225-Duggan_081109_3031.png",
+      "stem": "a4225-Duggan_081109_3031"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4579-Duggan_090212_5073.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4579-Duggan_090212_5073.png",
+      "stem": "a4579-Duggan_090212_5073"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4306-Duggan_090127_4836.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4306-Duggan_090127_4836.png",
+      "stem": "a4306-Duggan_090127_4836"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a2548-jmac_DSC3866.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a2548-jmac_DSC3866.png",
+      "stem": "a2548-jmac_DSC3866"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1191-_DSC0065-2.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1191-_DSC0065-2.png",
+      "stem": "a1191-_DSC0065-2"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a3394-_DGW6419.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a3394-_DGW6419.png",
+      "stem": "a3394-_DGW6419"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a2450-_DSC3092.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a2450-_DSC3092.png",
+      "stem": "a2450-_DSC3092"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a0727-07-11-11-at-11h53m38s-_MG_4569.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a0727-07-11-11-at-11h53m38s-_MG_4569.png",
+      "stem": "a0727-07-11-11-at-11h53m38s-_MG_4569"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1075-IMG_9189.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1075-IMG_9189.png",
+      "stem": "a1075-IMG_9189"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a0450-20061111_144844__E6B5666.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a0450-20061111_144844__E6B5666.png",
+      "stem": "a0450-20061111_144844__E6B5666"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a0115-DSC_0004-1.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a0115-DSC_0004-1.png",
+      "stem": "a0115-DSC_0004-1"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a0546-dgw_153.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a0546-dgw_153.png",
+      "stem": "a0546-dgw_153"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4093-jn_20071117-031.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4093-jn_20071117-031.png",
+      "stem": "a4093-jn_20071117-031"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a2321-NKIM_119.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a2321-NKIM_119.png",
+      "stem": "a2321-NKIM_119"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1814-Ja_Pe-22.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1814-Ja_Pe-22.png",
+      "stem": "a1814-Ja_Pe-22"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4197-_MG_6428.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4197-_MG_6428.png",
+      "stem": "a4197-_MG_6428"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a2385-_DSC4276.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a2385-_DSC4276.png",
+      "stem": "a2385-_DSC4276"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a0733-WP_CRW_0495.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a0733-WP_CRW_0495.png",
+      "stem": "a0733-WP_CRW_0495"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4890-kme_0220.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4890-kme_0220.png",
+      "stem": "a4890-kme_0220"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a0120-_MG_0300.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a0120-_MG_0300.png",
+      "stem": "a0120-_MG_0300"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1597-DSC_0274.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1597-DSC_0274.png",
+      "stem": "a1597-DSC_0274"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1109-KE_-0010-2.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1109-KE_-0010-2.png",
+      "stem": "a1109-KE_-0010-2"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a2617-IMG_3977.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a2617-IMG_3977.png",
+      "stem": "a2617-IMG_3977"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a2533-IMG_4720.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a2533-IMG_4720.png",
+      "stem": "a2533-IMG_4720"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4765-DSC_0009-3.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4765-DSC_0009-3.png",
+      "stem": "a4765-DSC_0009-3"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4094-_I2E8004.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4094-_I2E8004.png",
+      "stem": "a4094-_I2E8004"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a0554-DSC_0003.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a0554-DSC_0003.png",
+      "stem": "a0554-DSC_0003"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a2200-dgw_031.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a2200-dgw_031.png",
+      "stem": "a2200-dgw_031"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4198-_DSC6401.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4198-_DSC6401.png",
+      "stem": "a4198-_DSC6401"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4664-DSC_0208.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4664-DSC_0208.png",
+      "stem": "a4664-DSC_0208"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a0705-WP_CRW_4059.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a0705-WP_CRW_4059.png",
+      "stem": "a0705-WP_CRW_4059"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a3456-DSC_0006-1-2.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a3456-DSC_0006-1-2.png",
+      "stem": "a3456-DSC_0006-1-2"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4716-DSC_0088.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4716-DSC_0088.png",
+      "stem": "a4716-DSC_0088"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1975-dgw_075.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1975-dgw_075.png",
+      "stem": "a1975-dgw_075"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1108-WP_CRW_4842.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1108-WP_CRW_4842.png",
+      "stem": "a1108-WP_CRW_4842"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a0040-_DSC5693.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a0040-_DSC5693.png",
+      "stem": "a0040-_DSC5693"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4608-Duggan_080413_6147.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4608-Duggan_080413_6147.png",
+      "stem": "a4608-Duggan_080413_6147"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1077-20060507_120136__E6B1106.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1077-20060507_120136__E6B1106.png",
+      "stem": "a1077-20060507_120136__E6B1106"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4068-tc_DSC2612.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4068-tc_DSC2612.png",
+      "stem": "a4068-tc_DSC2612"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1270-jn_20080803_0429.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1270-jn_20080803_0429.png",
+      "stem": "a1270-jn_20080803_0429"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a3956-IMG_1808.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a3956-IMG_1808.png",
+      "stem": "a3956-IMG_1808"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1275-20080809_at_14h45m40__MG_0065.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1275-20080809_at_14h45m40__MG_0065.png",
+      "stem": "a1275-20080809_at_14h45m40__MG_0065"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4103-LS_Z3J3942.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4103-LS_Z3J3942.png",
+      "stem": "a4103-LS_Z3J3942"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a2998-kme_599.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a2998-kme_599.png",
+      "stem": "a2998-kme_599"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a2764-07-11-19-at-13h52m09s-_MG_5054.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a2764-07-11-19-at-13h52m09s-_MG_5054.png",
+      "stem": "a2764-07-11-19-at-13h52m09s-_MG_5054"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a3801-jmacDSC_0380.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a3801-jmacDSC_0380.png",
+      "stem": "a3801-jmacDSC_0380"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a3212-_MG_1504.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a3212-_MG_1504.png",
+      "stem": "a3212-_MG_1504"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1022-IMG_4563.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1022-IMG_4563.png",
+      "stem": "a1022-IMG_4563"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a3363-kme_226.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a3363-kme_226.png",
+      "stem": "a3363-kme_226"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a0504-jmacIMG_6809.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a0504-jmacIMG_6809.png",
+      "stem": "a0504-jmacIMG_6809"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a2970-kme_123.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a2970-kme_123.png",
+      "stem": "a2970-kme_123"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a2638-LS_060107_0717.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a2638-LS_060107_0717.png",
+      "stem": "a2638-LS_060107_0717"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4871-20090419_at_18h20m09__MG_2343.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4871-20090419_at_18h20m09__MG_2343.png",
+      "stem": "a4871-20090419_at_18h20m09__MG_2343"
+    }
+  ],
+  "val": [
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a3940-20050602_180025__MG_2820.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a3940-20050602_180025__MG_2820.png",
+      "stem": "a3940-20050602_180025__MG_2820"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1754-050704_162856__MG_3476.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1754-050704_162856__MG_3476.png",
+      "stem": "a1754-050704_162856__MG_3476"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1431-dgw_089.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1431-dgw_089.png",
+      "stem": "a1431-dgw_089"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1548-_MG_1040.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1548-_MG_1040.png",
+      "stem": "a1548-_MG_1040"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a0140-jmac_DSC3242.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a0140-jmac_DSC3242.png",
+      "stem": "a0140-jmac_DSC3242"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a2133-20060617_140539__MG_8570.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a2133-20060617_140539__MG_8570.png",
+      "stem": "a2133-20060617_140539__MG_8570"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a0310-IMG_1898.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a0310-IMG_1898.png",
+      "stem": "a0310-IMG_1898"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4414-DSC_0292.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4414-DSC_0292.png",
+      "stem": "a4414-DSC_0292"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a2261-kme_012.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a2261-kme_012.png",
+      "stem": "a2261-kme_012"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4692-20090321_at_16h01m53__MG_0133.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4692-20090321_at_16h01m53__MG_0133.png",
+      "stem": "a4692-20090321_at_16h01m53__MG_0133"
+    }
+  ],
+  "test": [
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a3926-dgw_077.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a3926-dgw_077.png",
+      "stem": "a3926-dgw_077"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a3179-kme_151.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a3179-kme_151.png",
+      "stem": "a3179-kme_151"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1376-NKIM_122.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1376-NKIM_122.png",
+      "stem": "a1376-NKIM_122"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a4165-jmacdscf0032.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a4165-jmacdscf0032.png",
+      "stem": "a4165-jmacdscf0032"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a1755-NKIM_MG_2646.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a1755-NKIM_MG_2646.png",
+      "stem": "a1755-NKIM_MG_2646"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a3213-_DSC4851.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a3213-_DSC4851.png",
+      "stem": "a3213-_DSC4851"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a0984-DSC_0035.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a0984-DSC_0035.png",
+      "stem": "a0984-DSC_0035"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a3588-CRW_0983.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a3588-CRW_0983.png",
+      "stem": "a3588-CRW_0983"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a2475-DSC_0014.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a2475-DSC_0014.png",
+      "stem": "a2475-DSC_0014"
+    },
+    {
+      "input": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\Original\\a2375-IMG_4979.png",
+      "target": "C:\\Users\\haejeg\\AndroidStudioProjects\\opticalcenter\\Convolutional-Neural-Network-Color-Corrector\\Data\\ExpertC\\a2375-IMG_4979.png",
+      "stem": "a2375-IMG_4979"
+    }
+  ]
+}

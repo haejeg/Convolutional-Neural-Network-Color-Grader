@@ -1,0 +1,29 @@
+[
+  {
+    "name": "baseline_no_gan",
+    "train_args": {
+      "epochs": 5,
+      "batch_size": 4,
+      "num_workers": 0,
+      "limit": 50,
+      "l1_weight": 0.5,
+      "cielab_weight": 0.5,
+      "perceptual_weight": 0.1
+    }
+  },
+  {
+    "name": "with_gan",
+    "train_args": {
+      "use_gan": true,
+      "gan_weight": 0.1,
+      "epochs": 5,
+      "batch_size": 4,
+      "num_workers": 0,
+      "limit": 50,
+      "l1_weight": 0.5,
+      "cielab_weight": 0.5,
+      "perceptual_weight": 0.1
+    }
+  }
+]
+

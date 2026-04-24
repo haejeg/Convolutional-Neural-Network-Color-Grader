@@ -14,7 +14,9 @@ HOW TO USE:
 
 import argparse
 import csv
+import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 import matplotlib
@@ -40,6 +42,9 @@ def parse_args():
     parser.add_argument("--data_dir", type=str,
                         default="Data",
                         help="Path to dataset directory (containing Original/ and ExpertC/)")
+    parser.add_argument("--run_dir", type=str, default=None,
+                        help="Directory to store outputs (config, splits, metrics, checkpoints). "
+                             "If omitted, uses experiments/run_YYYYMMDD_HHMMSS")
     parser.add_argument("--epochs", type=int, default=100,
                         help="Total number of training epochs")
     parser.add_argument("--batch_size", type=int, default=8,
@@ -58,6 +63,18 @@ def parse_args():
                         help="Random seed for deterministic behavior")
     parser.add_argument("--save_interval", type=int, default=5,
                         help="Interval in epochs between saving visual comparison grids")
+
+    # Variant controls for controlled experiments
+    parser.add_argument("--use_gan", action="store_true",
+                        help="Enable adversarial (GAN) training. If not set, trains without GAN.")
+    parser.add_argument("--gan_weight", type=float, default=0.1,
+                        help="Weight for adversarial loss when --use_gan is enabled.")
+    parser.add_argument("--l1_weight", type=float, default=0.5,
+                        help="Weight for pixel L1 loss in combined content loss.")
+    parser.add_argument("--cielab_weight", type=float, default=0.5,
+                        help="Weight for CIELAB loss in combined content loss.")
+    parser.add_argument("--perceptual_weight", type=float, default=0.1,
+                        help="Weight for VGG perceptual loss in combined content loss.")
     return parser.parse_args()
 
 
@@ -102,13 +119,29 @@ def load_checkpoint(path: str, model, optimizer, scheduler, device, discriminato
     return start_epoch, best_val_loss
 
 
-def train_one_epoch(model, discriminator, loader, optimizer, optimizer_D, perceptual_fn, gan_loss_fn, device, epoch) -> dict:
+def train_one_epoch(
+    model,
+    discriminator,
+    loader,
+    optimizer,
+    optimizer_D,
+    perceptual_fn,
+    gan_loss_fn,
+    device,
+    epoch,
+    *,
+    l1_weight: float,
+    cielab_weight: float,
+    perceptual_weight: float,
+    gan_weight: float,
+) -> dict:
     """Executes a single training epoch."""
     model.train() 
-    discriminator.train() 
+    if discriminator is not None:
+        discriminator.train()
     
     total_loss = total_l1 = total_cielab = total_perceptual = total_adv = total_D_loss = 0.0
-    total_psnr = total_ssim = 0.0
+    total_psnr = total_ssim = total_delta_e = 0.0
 
     progress = tqdm(loader, desc=f"Epoch {epoch:03d} [train]", leave=False)
     for batch in progress:
@@ -117,25 +150,37 @@ def train_one_epoch(model, discriminator, loader, optimizer, optimizer_D, percep
 
         preds = model(inputs)
 
-        # Update Discriminator
-        pred_real = discriminator(inputs, targets)
-        loss_D_real = gan_loss_fn(pred_real, True)
-        
-        pred_fake = discriminator(inputs, preds.detach())
-        loss_D_fake = gan_loss_fn(pred_fake, False)
-        
-        loss_D = (loss_D_real + loss_D_fake) * 0.5
+        loss_content, components = combined_loss(
+            preds,
+            targets,
+            perceptual_fn,
+            l1_weight=l1_weight,
+            cielab_weight=cielab_weight,
+            perceptual_weight=perceptual_weight,
+        )
 
-        optimizer_D.zero_grad()
-        loss_D.backward()
-        optimizer_D.step()
+        loss_G_adv = torch.tensor(0.0, device=device)
+        loss_D = torch.tensor(0.0, device=device)
 
-        # Update Generator
-        pred_fake_for_G = discriminator(inputs, preds)
-        loss_G_adv = gan_loss_fn(pred_fake_for_G, True)
+        if discriminator is not None:
+            # Update Discriminator
+            pred_real = discriminator(inputs, targets)
+            loss_D_real = gan_loss_fn(pred_real, True)
+            
+            pred_fake = discriminator(inputs, preds.detach())
+            loss_D_fake = gan_loss_fn(pred_fake, False)
+            
+            loss_D = (loss_D_real + loss_D_fake) * 0.5
 
-        loss_content, components = combined_loss(preds, targets, perceptual_fn)
-        loss_G = loss_content + 0.1 * loss_G_adv
+            optimizer_D.zero_grad()
+            loss_D.backward()
+            optimizer_D.step()
+
+            # Update Generator (adversarial component)
+            pred_fake_for_G = discriminator(inputs, preds)
+            loss_G_adv = gan_loss_fn(pred_fake_for_G, True)
+
+        loss_G = loss_content + gan_weight * loss_G_adv
 
         optimizer.zero_grad()
         loss_G.backward()
@@ -152,8 +197,12 @@ def train_one_epoch(model, discriminator, loader, optimizer, optimizer_D, percep
             total_D_loss += loss_D.item()
             total_psnr += metrics["psnr"]
             total_ssim += metrics["ssim"]
+            total_delta_e += metrics["delta_e"]
 
-        progress.set_postfix(G_loss=f"{loss_G.item():.4f}", D_loss=f"{loss_D.item():.4f}")
+        if discriminator is not None:
+            progress.set_postfix(G_loss=f"{loss_G.item():.4f}", D_loss=f"{loss_D.item():.4f}")
+        else:
+            progress.set_postfix(G_loss=f"{loss_G.item():.4f}")
 
     n = len(loader)
     return {
@@ -165,6 +214,7 @@ def train_one_epoch(model, discriminator, loader, optimizer, optimizer_D, percep
         "d_loss": total_D_loss / n,
         "psnr": total_psnr / n,
         "ssim": total_ssim / n,
+        "delta_e": total_delta_e / n,
     }
 
 
@@ -174,7 +224,7 @@ def validate(model, loader, perceptual_fn, device) -> dict:
     model.eval()
     
     total_loss = total_l1 = total_cielab = total_perceptual = 0.0
-    total_psnr = total_ssim = 0.0
+    total_psnr = total_ssim = total_delta_e = 0.0
     last_batch = None
 
     progress = tqdm(loader, desc="           [val]  ", leave=False)
@@ -193,6 +243,7 @@ def validate(model, loader, perceptual_fn, device) -> dict:
         total_perceptual += components["perceptual"]
         total_psnr += metrics["psnr"]
         total_ssim += metrics["ssim"]
+        total_delta_e += metrics["delta_e"]
         
         last_batch = (inputs.cpu(), preds.cpu(), targets.cpu())
 
@@ -206,6 +257,7 @@ def validate(model, loader, perceptual_fn, device) -> dict:
         "perceptual": total_perceptual / n,
         "psnr": total_psnr / n,
         "ssim": total_ssim / n,
+        "delta_e": total_delta_e / n,
         "last_batch": last_batch,
     }
 
@@ -273,6 +325,17 @@ def main():
     device = get_device()
 
     repo_root = Path(__file__).parent.parent
+    run_dir = Path(args.run_dir) if args.run_dir else (repo_root / "experiments" / f"run_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
+    run_dir.mkdir(parents=True, exist_ok=True)
+    checkpoints_dir = run_dir / "checkpoints"
+    results_dir = run_dir / "results"
+    checkpoints_dir.mkdir(exist_ok=True)
+    results_dir.mkdir(exist_ok=True)
+
+    # Save run configuration early for reproducibility
+    with open(run_dir / "config.json", "w", encoding="utf-8") as f:
+        json.dump(vars(args), f, indent=2)
+
     data_dir = repo_root / args.data_dir
     input_dir = data_dir / "Original"
     gt_dir = data_dir / "ExpertC"
@@ -299,6 +362,23 @@ def main():
     val_ds = FiveKDataset(val_pairs, split="val", crop_size=args.crop_size)
     test_ds = FiveKDataset(test_pairs, split="val", crop_size=args.crop_size)
 
+    # Save split lists for reproducibility
+    def _pairs_to_records(pairs):
+        return [{"input": p[0], "target": p[1], "stem": Path(p[0]).stem} for p in pairs]
+
+    with open(run_dir / "splits.json", "w", encoding="utf-8") as f:
+        json.dump(
+            {
+                "seed": args.seed,
+                "data_dir": str(data_dir),
+                "train": _pairs_to_records(train_pairs),
+                "val": _pairs_to_records(val_pairs),
+                "test": _pairs_to_records(test_pairs),
+            },
+            f,
+            indent=2,
+        )
+
     train_loader = DataLoader(
         train_ds, batch_size=args.batch_size, shuffle=True,
         num_workers=args.num_workers, pin_memory=(device.type == "cuda"),
@@ -316,15 +396,16 @@ def main():
     )
 
     model = UNet(in_channels=3, out_channels=3, base_channels=64).to(device)
-    discriminator = PatchDiscriminator().to(device)
+    discriminator = PatchDiscriminator().to(device) if args.use_gan else None
     print(f"Generator parameters: {count_parameters(model):,}")
-    print(f"Discriminator parameters: {count_parameters(discriminator):,}")
+    if discriminator is not None:
+        print(f"Discriminator parameters: {count_parameters(discriminator):,}")
 
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
-    optimizer_D = optim.Adam(discriminator.parameters(), lr=args.lr)
+    optimizer_D = optim.Adam(discriminator.parameters(), lr=args.lr) if discriminator is not None else None
 
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs)
-    scheduler_D = optim.lr_scheduler.CosineAnnealingLR(optimizer_D, T_max=args.epochs)
+    scheduler_D = optim.lr_scheduler.CosineAnnealingLR(optimizer_D, T_max=args.epochs) if optimizer_D is not None else None
 
     perceptual_fn = PerceptualLoss(device=device)
     gan_loss_fn = GANLoss(use_lsgan=True).to(device)
@@ -335,25 +416,39 @@ def main():
     if args.resume:
         start_epoch, best_val_loss = load_checkpoint(args.resume, model, optimizer, scheduler, device, discriminator, optimizer_D, scheduler_D)
 
-    checkpoints_dir = repo_root / "checkpoints"
-    results_dir = repo_root / "results"
-    checkpoints_dir.mkdir(exist_ok=True)
-    results_dir.mkdir(exist_ok=True)
-
     csv_path = results_dir / "metrics.csv"
-    csv_fields = ["epoch", "train_loss", "train_psnr", "train_ssim",
-                  "val_loss", "val_psnr", "val_ssim", "lr"]
+    csv_fields = [
+        "epoch",
+        "train_loss", "train_psnr", "train_ssim", "train_delta_e",
+        "val_loss", "val_psnr", "val_ssim", "val_delta_e",
+        "lr",
+    ]
     csv_is_new = not csv_path.exists()
 
     print(f"\nStarting training for {args.epochs} epochs...\n")
 
     for epoch in range(start_epoch, args.epochs + 1):
-        train_metrics = train_one_epoch(model, discriminator, train_loader, optimizer, optimizer_D, perceptual_fn, gan_loss_fn, device, epoch)
+        train_metrics = train_one_epoch(
+            model,
+            discriminator,
+            train_loader,
+            optimizer,
+            optimizer_D,
+            perceptual_fn,
+            gan_loss_fn,
+            device,
+            epoch,
+            l1_weight=args.l1_weight,
+            cielab_weight=args.cielab_weight,
+            perceptual_weight=args.perceptual_weight,
+            gan_weight=args.gan_weight,
+        )
 
         val_metrics = validate(model, val_loader, perceptual_fn, device)
 
         scheduler.step()
-        scheduler_D.step()
+        if scheduler_D is not None:
+            scheduler_D.step()
 
         lr = optimizer.param_groups[0]["lr"]
         print(
@@ -376,9 +471,11 @@ def main():
                 "train_loss": f"{train_metrics['loss']:.6f}",
                 "train_psnr": f"{train_metrics['psnr']:.4f}",
                 "train_ssim": f"{train_metrics['ssim']:.4f}",
+                "train_delta_e": f"{train_metrics['delta_e']:.4f}",
                 "val_loss": f"{val_metrics['loss']:.6f}",
                 "val_psnr": f"{val_metrics['psnr']:.4f}",
                 "val_ssim": f"{val_metrics['ssim']:.4f}",
+                "val_delta_e": f"{val_metrics['delta_e']:.4f}",
                 "lr": f"{lr:.2e}",
             })
 
@@ -414,8 +511,21 @@ def main():
     print(
         f"Test Loss: {test_metrics['loss']:.4f} | "
         f"Test PSNR: {test_metrics['psnr']:.2f} dB | "
-        f"Test SSIM: {test_metrics['ssim']:.4f}"
+        f"Test SSIM: {test_metrics['ssim']:.4f} | "
+        f"Test ΔE: {test_metrics['delta_e']:.3f}"
     )
+
+    with open(results_dir / "test_metrics.json", "w", encoding="utf-8") as f:
+        json.dump(
+            {
+                "loss": float(test_metrics["loss"]),
+                "psnr": float(test_metrics["psnr"]),
+                "ssim": float(test_metrics["ssim"]),
+                "delta_e": float(test_metrics["delta_e"]),
+            },
+            f,
+            indent=2,
+        )
 
     test_samples_dir = results_dir / "test_samples"
     test_samples_dir.mkdir(exist_ok=True)

@@ -28,12 +28,28 @@ def parse_args():
                         help="Input image name (e.g., 'hi.jpg') in the 'Input' folder. Leave blank to process the whole folder.")
     parser.add_argument("--input", type=str, default=None,
                         help="Alternative way to provide input image name or path")
+    parser.add_argument("--input_dir", type=str, default="Input",
+                        help="Input directory used when image_name/--input is not an absolute path (default: 'Input')")
     parser.add_argument("--output", type=str, default="results",
                         help="Output image path or directory (defaults to 'results')")
     parser.add_argument("--checkpoint", type=str, default="checkpoints/best.pth",
                         help="Path to model checkpoint (default: checkpoints/best.pth)")
     parser.add_argument("--device", type=str, default=None,
                         help="Device override: 'cpu', 'cuda', or 'mps'")
+
+    # Optional runtime grading preferences (applied after the model output)
+    parser.add_argument("--warmth", type=float, default=0.0,
+                        help="Warm/cool shift in [-1, 1]. Negative=cool, positive=warm.")
+    parser.add_argument("--tint", type=float, default=0.0,
+                        help="Green/magenta shift in [-1, 1]. Negative=green, positive=magenta.")
+    parser.add_argument("--sat", type=float, default=0.0,
+                        help="Saturation adjustment in [-1, 1].")
+    parser.add_argument("--contrast", type=float, default=0.0,
+                        help="Contrast adjustment in [-1, 1].")
+    parser.add_argument("--exposure", type=float, default=0.0,
+                        help="Exposure in approximate stops (e.g., -1.0 darker, +1.0 brighter).")
+    parser.add_argument("--grade_linear", action="store_true",
+                        help="Apply warmth/tint in linear RGB for more photographic behavior.")
     return parser.parse_args()
 
 
@@ -100,13 +116,82 @@ def postprocess_tensor(tensor: torch.Tensor, original_size: tuple) -> Image.Imag
     return tensor_to_pil(tensor)
 
 
+def _srgb_to_linear(x: torch.Tensor) -> torch.Tensor:
+    return torch.where(x <= 0.04045, x / 12.92, torch.pow((x + 0.055) / 1.055, 2.4))
+
+
+def _linear_to_srgb(x: torch.Tensor) -> torch.Tensor:
+    return torch.where(x <= 0.0031308, x * 12.92, 1.055 * torch.pow(x, 1.0 / 2.4) - 0.055)
+
+
+def apply_runtime_grade(
+    pred: torch.Tensor,
+    *,
+    warmth: float = 0.0,
+    tint: float = 0.0,
+    saturation: float = 0.0,
+    contrast: float = 0.0,
+    exposure: float = 0.0,
+    grade_linear: bool = False,
+) -> torch.Tensor:
+    """
+    Apply simple, user-controlled grading to a predicted tensor.
+    Expects pred in [-1, 1] and returns a tensor in [-1, 1].
+    """
+    x = (pred + 1.0) / 2.0
+    x = x.clamp(0.0, 1.0)
+
+    # Exposure in "stops": multiply by 2^stops
+    if exposure != 0.0:
+        x = x * (2.0 ** float(exposure))
+
+    # Warmth/tint (either in sRGB-ish or linear RGB)
+    if any(v != 0.0 for v in (warmth, tint)):
+        if grade_linear:
+            x_lin = _srgb_to_linear(x)
+            r, g, b = x_lin[:, 0:1], x_lin[:, 1:2], x_lin[:, 2:3]
+            r = r * (1.0 + 0.10 * float(warmth))
+            b = b * (1.0 - 0.10 * float(warmth))
+            g = g * (1.0 - 0.10 * float(tint))
+            x = _linear_to_srgb(torch.cat([r, g, b], dim=1).clamp(0.0, 1.0))
+        else:
+            r, g, b = x[:, 0:1], x[:, 1:2], x[:, 2:3]
+            r = r * (1.0 + 0.10 * float(warmth))
+            b = b * (1.0 - 0.10 * float(warmth))
+            g = g * (1.0 - 0.10 * float(tint))
+            x = torch.cat([r, g, b], dim=1)
+
+    # Contrast around mid-gray
+    if contrast != 0.0:
+        c = 1.0 + 0.50 * float(contrast)
+        x = (x - 0.5) * c + 0.5
+
+    # Saturation: lerp between grayscale and original
+    if saturation != 0.0:
+        gray = 0.299 * x[:, 0:1] + 0.587 * x[:, 1:2] + 0.114 * x[:, 2:3]
+        s = 1.0 + 0.75 * float(saturation)
+        x = gray + (x - gray) * s
+
+    x = x.clamp(0.0, 1.0)
+    return x * 2.0 - 1.0
+
+
 @torch.no_grad() 
-def retouch_image(model: UNet, image_path: str, output_path: str, device: torch.device):
+def retouch_image(model: UNet, image_path: str, output_path: str, device: torch.device, args):
     """Performs inference on a single image and saves the result."""
     print(f"  Processing: {Path(image_path).name}")
 
     tensor, original_size, padding = preprocess_image(image_path, device)
     pred = model(tensor)
+    pred = apply_runtime_grade(
+        pred,
+        warmth=args.warmth,
+        tint=args.tint,
+        saturation=args.sat,
+        contrast=args.contrast,
+        exposure=args.exposure,
+        grade_linear=args.grade_linear,
+    )
     result_img = postprocess_tensor(pred, original_size)
 
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
@@ -128,12 +213,13 @@ def main():
     input_given = args.image_name or args.input
     if input_given:
         input_path = Path(input_given)
-        if not input_path.exists() and (Path("Input") / input_given).exists():
-            input_path = Path("Input") / input_given
+        input_dir = Path(args.input_dir)
+        if not input_path.exists() and (input_dir / input_given).exists():
+            input_path = input_dir / input_given
         elif not input_path.exists() and not input_path.is_absolute():
-            input_path = Path("Input") / input_given
+            input_path = input_dir / input_given
     else:
-        input_path = Path("Input")
+        input_path = Path(args.input_dir)
 
     output_path = Path(args.output)
     image_extensions = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp"}
@@ -151,7 +237,7 @@ def main():
 
         for img_path in image_files:
             out_file = output_path / img_path.name
-            retouch_image(model, str(img_path), str(out_file), device)
+            retouch_image(model, str(img_path), str(out_file), device, args)
 
         print(f"\nDone. {len(image_files)} images saved to {output_path}/")
 
@@ -165,7 +251,7 @@ def main():
             output_path = output_path / input_path.name
 
         print(f"\nRetouching {input_path}...\n")
-        retouch_image(model, str(input_path), str(output_path), device)
+        retouch_image(model, str(input_path), str(output_path), device, args)
         print("\nDone.")
     else:
         print(f"Input not found: {input_path}")

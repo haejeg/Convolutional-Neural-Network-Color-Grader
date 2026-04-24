@@ -160,8 +160,8 @@ if __name__ == "__main__":
     from torch.utils.data import DataLoader
 
     repo_root = Path(__file__).parent.parent
-    input_dir = repo_root / "data" / "archive" / "fivek_512px" / "input"
-    gt_dir = repo_root / "data" / "archive" / "fivek_512px" / "expertC_gt"
+    input_dir = repo_root / "Data" / "Original"
+    gt_dir = repo_root / "Data" / "ExpertC"
 
     if not input_dir.exists() or not gt_dir.exists():
         print(f"ERROR: Dataset directories not found.\nExpected:\n  {input_dir}\n  {gt_dir}")
