@@ -150,6 +150,25 @@ class FiveKDataset(Dataset):
             shift_x = torch.randint(-3, 4, (1,)).item()
             shift_y = torch.randint(-3, 4, (1,)).item()
             input_tensor[1] = torch.roll(input_tensor[1], shifts=(shift_y, shift_x), dims=(0, 1))
+
+        # --- Complementary Color Grading Adjustment ---
+        # Apply a split toning effect to the ground truth targets to encourage cinematic outputs.
+        # Shadows are pushed slightly cool (teal) and highlights slightly warm (orange).
+        
+        # Calculate pixel luminance to use as a mask
+        luminance = 0.299 * target_tensor[0] + 0.587 * target_tensor[1] + 0.114 * target_tensor[2]
+        
+        shadow_mask = 1.0 - luminance
+        highlight_mask = luminance
+        
+        # Color multipliers for shadows (teal) and highlights (orange)
+        t_r, t_g, t_b = 0.90, 1.05, 1.10
+        o_r, o_g, o_b = 1.10, 1.05, 0.85
+        
+        # Blend the adjustments into the target tensor
+        target_tensor[0] = torch.clamp(target_tensor[0] * (t_r * shadow_mask + o_r * highlight_mask), 0.0, 1.0)
+        target_tensor[1] = torch.clamp(target_tensor[1] * (t_g * shadow_mask + o_g * highlight_mask), 0.0, 1.0)
+        target_tensor[2] = torch.clamp(target_tensor[2] * (t_b * shadow_mask + o_b * highlight_mask), 0.0, 1.0)
         
         return input_tensor, target_tensor
 

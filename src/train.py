@@ -8,8 +8,8 @@ HOW TO USE:
   # Quick test run:
   python src/train.py --epochs 2 --batch_size 2 --num_workers 0
 
-  # Training Run with limited dataset:
-  python src/train.py --epochs 100 --batch_size 8 --num_workers 4 --limit 100
+  # Full training run:
+  python src/train.py --epochs 100 --batch_size 8 --num_workers 4
 """
 
 import argparse
