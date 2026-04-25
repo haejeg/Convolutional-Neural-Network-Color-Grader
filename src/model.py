@@ -134,9 +134,8 @@ class UNet(nn.Module):
         self.dec2 = Up(b * 2 + b * 2, b)             # 128+128 → 64 ch
         self.dec1 = Up(b + b, b // 2)                 # 64+64   → 32 ch
 
-        # Final 1x1 conv outputs 7 channels: 
-        # 6 for Global Color Grade (RGB Gain/Gamma) and 1 for Spatial Exposure Mask
-        self.final_conv = nn.Conv2d(b // 2, 7, kernel_size=1)
+        # Final 1x1 convolution maps to output channels
+        self.final_conv = nn.Conv2d(b // 2, out_channels, kernel_size=1)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         raw_input = x  # save for residual addition at the end
@@ -157,33 +156,25 @@ class UNet(nn.Module):
         x = self.dec1(x, s1)
 
         # ---------------------------------------------------------
-        # CINEMATIC DRAMA & HARMONY UPGRADE:
-        # We output 7 layers:
-        # Layers 1-6: Averaged globally to create harmonized RGB Gain & Gamma for color grading. 
-        # Layer 7: Kept spatial (per-pixel) as a 1-channel Local Exposure Map. 
-        # Because the spatial map is 1-channel (scales RGB equally), it CANNOT bleed colors, 
-        # but it CAN create spotlights, dodging, burning, and vignettes to guide the viewer's eye!
+        # GLOBAL FILTER UPGRADE:
+        # Instead of predicting a localized parameter for every pixel, we collapse 
+        # the network's understanding into a single global set of parameters!
+        # This acts EXACTLY like a Lightroom preset or color filter applied 
+        # to the whole photo uniformly.
         # ---------------------------------------------------------
-        x_out = self.final_conv(x)  # Shape (B, 7, H, W)
+        x_global = torch.mean(x, dim=(2, 3), keepdim=True)  # Pool spatial dims -> shape (B, C, 1, 1)
 
-        # 1. Global Harmony (Hues & Saturation)
-        global_params = torch.mean(x_out[:, 0:6, :, :], dim=(2, 3), keepdim=True)
-        gain_logits = global_params[:, 0:3, :, :]
-        gamma_logits = global_params[:, 3:6, :, :]
+        # Project to just 3 curve parameters (R, G, B) for the ENTIRE image
+        global_curve_params = torch.tanh(self.final_conv(x_global))
 
-        gain = torch.sigmoid(gain_logits) * 1.5 + 0.2
-        gamma = torch.exp(gamma_logits / 2.0)
-
-        # 2. Spatial Dodging and Burning (Guide the Eye / Evoke Emotion)
-        exposure_logits = x_out[:, 6:7, :, :]
-        # Exposure map allows the network to halve (0.5x) or double (1.5x) local luminance
-        exposure_map = torch.sigmoid(exposure_logits) + 0.5 
-
-        # Prepare image 
-        x_01 = torch.clamp((raw_input + 1.0) / 2.0, min=1e-6, max=1.0)
+        # Because `global_curve_params` is exactly the same for every pixel, 
+        # it is physically and mathematically impossible for color to bleed 
+        # across spatial boundaries! No more green trees bleeding into skies.
+        x_01 = (raw_input + 1.0) / 2.0
         
-        # Apply Harmonized Global Grade AND Dramatic Local Exposure Mask
-        x_01 = (x_01 ** gamma) * gain * exposure_map
+        # Apply the RGB curves
+        for _ in range(3):
+            x_01 = x_01 + global_curve_params * x_01 * (1.0 - x_01)
             
         # Convert back
         output = torch.clamp((x_01 * 2.0) - 1.0, -1.0, 1.0)

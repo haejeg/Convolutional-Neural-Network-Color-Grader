@@ -151,29 +151,12 @@ class FiveKDataset(Dataset):
             shift_y = torch.randint(-3, 4, (1,)).item()
             input_tensor[1] = torch.roll(input_tensor[1], shifts=(shift_y, shift_x), dims=(0, 1))
 
-        # -------------------------------------------------------------
-        # Color Theory Application: Complementary Colors (Split Toning)
-        # Instead of a flat yellow wash, we apply classic Teal/Orange color theory.
-        # This pushes shadows towards cool Teal (receding) and highlights towards 
-        # warm Orange (advancing), generating maximum depth and life.
-        # -------------------------------------------------------------
-        # Calculate perceived brightness (luminance) per pixel
-        luminance = 0.299 * target_tensor[0] + 0.587 * target_tensor[1] + 0.114 * target_tensor[2]
-        
-        # Create masks to separate shadows and highlights
-        shadow_mask = 1.0 - luminance
-        highlight_mask = luminance
-        
-        # Teal shadows (lower Red, raise Blue/Green)
-        t_r, t_g, t_b = 0.90, 1.05, 1.10
-        
-        # Orange/Warm highlights (raise Red, lower Blue) 
-        o_r, o_g, o_b = 1.10, 1.05, 0.85
-        
-        # Blend the color theory multipliers smoothly based on the pixel's lighting
-        target_tensor[0] = torch.clamp(target_tensor[0] * (t_r * shadow_mask + o_r * highlight_mask), 0.0, 1.0)
-        target_tensor[1] = torch.clamp(target_tensor[1] * (t_g * shadow_mask + o_g * highlight_mask), 0.0, 1.0)
-        target_tensor[2] = torch.clamp(target_tensor[2] * (t_b * shadow_mask + o_b * highlight_mask), 0.0, 1.0)
+        # Add a warm, nostalgic (yellow) tint to ALL targets.
+        # Yellow is achieved by increasing Red/Green and lowering Blue.
+        # Training the network mapped to these targets permanently biases its style.
+        target_tensor[0] = torch.clamp(target_tensor[0] * 1.10, 0.0, 1.0)  # Boost Red 10%
+        target_tensor[1] = torch.clamp(target_tensor[1] * 1.05, 0.0, 1.0)  # Boost Green 5%
+        target_tensor[2] = target_tensor[2] * 0.85                         # Drop Blue 15%
         
         return input_tensor, target_tensor
 
