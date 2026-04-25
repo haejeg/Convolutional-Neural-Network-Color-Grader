@@ -178,8 +178,10 @@ class FiveKDataset(Dataset):
         return input_tensor, target_tensor
 
 
+# ---------------------------------------------------------------------------
 # Quick test — run this file directly to verify the dataset loads correctly:
 #   python src/dataset.py
+# ---------------------------------------------------------------------------
 if __name__ == "__main__":
     import sys
     from torch.utils.data import DataLoader

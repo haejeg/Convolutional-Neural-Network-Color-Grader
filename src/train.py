@@ -23,10 +23,6 @@ import csv
 import sys
 from pathlib import Path
 
-import matplotlib
-matplotlib.use('Agg')  # Use non-interactive backend
-import matplotlib.pyplot as plt
-
 # Add project root to path so we can import from src/
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -36,9 +32,9 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from src.dataset import FiveKDataset, make_splits
-from src.losses import PerceptualLoss, combined_loss, GANLoss
+from src.losses import PerceptualLoss, combined_loss
 from src.metrics import evaluate_batch
-from src.model import UNet, count_parameters, PatchDiscriminator
+from src.model import UNet, count_parameters
 from src.utils import get_device, save_comparison_grid, set_seed
 
 
@@ -68,26 +64,19 @@ def parse_args():
     return parser.parse_args()
 
 
-def save_checkpoint(model, optimizer, scheduler, epoch, val_loss, best_val_loss, path: str, discriminator=None, optimizer_D=None, scheduler_D=None):
+def save_checkpoint(model, optimizer, scheduler, epoch, val_loss, best_val_loss, path: str):
     """Save training state so we can resume later or deploy the model."""
-    state = {
+    torch.save({
         "epoch": epoch,
         "model_state_dict": model.state_dict(),
         "optimizer_state_dict": optimizer.state_dict(),
         "scheduler_state_dict": scheduler.state_dict(),
         "val_loss": val_loss,
         "best_val_loss": best_val_loss,
-    }
-    if discriminator:
-        state["discriminator_state_dict"] = discriminator.state_dict()
-    if optimizer_D:
-        state["optimizer_D_state_dict"] = optimizer_D.state_dict()
-    if scheduler_D:
-        state["scheduler_D_state_dict"] = scheduler_D.state_dict()
-    torch.save(state, path)
+    }, path)
 
 
-def load_checkpoint(path: str, model, optimizer, scheduler, device, discriminator=None, optimizer_D=None, scheduler_D=None) -> tuple[int, float]:
+def load_checkpoint(path: str, model, optimizer, scheduler, device) -> tuple[int, float]:
     """
     Load a checkpoint and restore model/optimizer/scheduler state.
     Returns (start_epoch, best_val_loss) so training can resume correctly.
@@ -96,14 +85,6 @@ def load_checkpoint(path: str, model, optimizer, scheduler, device, discriminato
     model.load_state_dict(checkpoint["model_state_dict"])
     optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
     scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
-    
-    if discriminator and "discriminator_state_dict" in checkpoint:
-        discriminator.load_state_dict(checkpoint["discriminator_state_dict"])
-    if optimizer_D and "optimizer_D_state_dict" in checkpoint:
-        optimizer_D.load_state_dict(checkpoint["optimizer_D_state_dict"])
-    if scheduler_D and "scheduler_D_state_dict" in checkpoint:
-        scheduler_D.load_state_dict(checkpoint["scheduler_D_state_dict"])
-        
     start_epoch = checkpoint["epoch"] + 1
     # Restore best_val_loss so we don't incorrectly overwrite best.pth on resume
     best_val_loss = checkpoint.get("best_val_loss", checkpoint["val_loss"])
@@ -111,14 +92,13 @@ def load_checkpoint(path: str, model, optimizer, scheduler, device, discriminato
     return start_epoch, best_val_loss
 
 
-def train_one_epoch(model, discriminator, loader, optimizer, optimizer_D, perceptual_fn, gan_loss_fn, device, epoch) -> dict:
+def train_one_epoch(model, loader, optimizer, perceptual_fn, device, epoch) -> dict:
     """
     Run one full pass through the training set.
     Returns averaged metrics over the epoch.
     """
     model.train()
-    discriminator.train()
-    total_loss = total_l1 = total_cielab = total_perceptual = total_adv = total_D_loss = 0.0
+    total_loss = total_l1 = total_perceptual = 0.0
     total_psnr = total_ssim = 0.0
 
     progress = tqdm(loader, desc=f"Epoch {epoch:03d} [train]", leave=False)
@@ -126,65 +106,33 @@ def train_one_epoch(model, discriminator, loader, optimizer, optimizer_D, percep
         inputs = batch["input"].to(device)
         targets = batch["target"].to(device)
 
-        # Forward Generator
+        # Forward pass
         preds = model(inputs)
 
-        # ---------------------
-        # Train Discriminator
-        # ---------------------
-        # Real pairs: D(input, target) should be True (1.0)
-        pred_real = discriminator(inputs, targets)
-        loss_D_real = gan_loss_fn(pred_real, True)
-        
-        # Fake pairs: D(input, pred) should be False (0.0)
-        pred_fake = discriminator(inputs, preds.detach())
-        loss_D_fake = gan_loss_fn(pred_fake, False)
-        
-        loss_D = (loss_D_real + loss_D_fake) * 0.5
+        # Compute loss
+        loss, components = combined_loss(preds, targets, perceptual_fn)
 
-        optimizer_D.zero_grad()
-        loss_D.backward()
-        optimizer_D.step()
-
-        # ---------------------
-        # Train Generator
-        # ---------------------
-        # G wants D to think its fake outputs are real
-        pred_fake_for_G = discriminator(inputs, preds)
-        loss_G_adv = gan_loss_fn(pred_fake_for_G, True)
-
-        # Content loss (L1 + CIELAB + Perceptual)
-        loss_content, components = combined_loss(preds, targets, perceptual_fn)
-
-        # Total G loss (Lambda for adversarial is 0.1)
-        loss_G = loss_content + 0.1 * loss_G_adv
-
+        # Backward pass
         optimizer.zero_grad()
-        loss_G.backward()
+        loss.backward()
         optimizer.step()
 
         # Accumulate metrics (detach from graph before computing quality metrics)
         with torch.no_grad():
             metrics = evaluate_batch(preds.detach(), targets)
-            total_loss += loss_G.item()
+            total_loss += components["total"]
             total_l1 += components["l1"]
-            total_cielab += components["cielab"]
             total_perceptual += components["perceptual"]
-            total_adv += loss_G_adv.item()
-            total_D_loss += loss_D.item()
             total_psnr += metrics["psnr"]
             total_ssim += metrics["ssim"]
 
-        progress.set_postfix(G_loss=f"{loss_G.item():.4f}", D_loss=f"{loss_D.item():.4f}")
+        progress.set_postfix(loss=f"{components['total']:.4f}")
 
     n = len(loader)
     return {
         "loss": total_loss / n,
         "l1": total_l1 / n,
-        "cielab": total_cielab / n,
         "perceptual": total_perceptual / n,
-        "adv": total_adv / n,
-        "d_loss": total_D_loss / n,
         "psnr": total_psnr / n,
         "ssim": total_ssim / n,
     }
@@ -197,7 +145,7 @@ def validate(model, loader, perceptual_fn, device) -> dict:
     Returns averaged metrics and the last batch for visualization.
     """
     model.eval()
-    total_loss = total_l1 = total_cielab = total_perceptual = 0.0
+    total_loss = total_l1 = total_perceptual = 0.0
     total_psnr = total_ssim = 0.0
     last_batch = None
 
@@ -212,7 +160,6 @@ def validate(model, loader, perceptual_fn, device) -> dict:
 
         total_loss += components["total"]
         total_l1 += components["l1"]
-        total_cielab += components["cielab"]
         total_perceptual += components["perceptual"]
         total_psnr += metrics["psnr"]
         total_ssim += metrics["ssim"]
@@ -224,72 +171,11 @@ def validate(model, loader, perceptual_fn, device) -> dict:
     return {
         "loss": total_loss / n,
         "l1": total_l1 / n,
-        "cielab": total_cielab / n,
         "perceptual": total_perceptual / n,
         "psnr": total_psnr / n,
         "ssim": total_ssim / n,
         "last_batch": last_batch,
     }
-
-
-def plot_learning_curves(csv_path: str, save_path: str):
-    """Read metrics.csv and plot Loss, PSNR, and SSIM curves."""
-    epochs, train_loss, val_loss = [], [], []
-    train_psnr, val_psnr = [], []
-    train_ssim, val_ssim = [], []
-    
-    if not Path(csv_path).exists():
-        return
-        
-    with open(csv_path, "r") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            try:
-                epochs.append(int(row["epoch"]))
-                train_loss.append(float(row["train_loss"]))
-                val_loss.append(float(row["val_loss"]))
-                train_psnr.append(float(row["train_psnr"]))
-                val_psnr.append(float(row["val_psnr"]))
-                train_ssim.append(float(row["train_ssim"]))
-                val_ssim.append(float(row["val_ssim"]))
-            except (ValueError, KeyError):
-                continue
-            
-    if not epochs:
-        return
-        
-    fig, axes = plt.subplots(1, 3, figsize=(18, 5))
-    
-    # Loss
-    axes[0].plot(epochs, train_loss, label='Train Loss', color='blue', linewidth=2)
-    axes[0].plot(epochs, val_loss, label='Val Loss', color='orange', linewidth=2)
-    axes[0].set_title('Loss (L1 + Perceptual)')
-    axes[0].set_xlabel('Epoch')
-    axes[0].set_ylabel('Loss')
-    axes[0].legend()
-    axes[0].grid(True, linestyle='--', alpha=0.7)
-    
-    # PSNR
-    axes[1].plot(epochs, train_psnr, label='Train PSNR', color='green', linewidth=2)
-    axes[1].plot(epochs, val_psnr, label='Val PSNR', color='red', linewidth=2)
-    axes[1].set_title('PSNR (Higher is better)')
-    axes[1].set_xlabel('Epoch')
-    axes[1].set_ylabel('dB')
-    axes[1].legend()
-    axes[1].grid(True, linestyle='--', alpha=0.7)
-    
-    # SSIM
-    axes[2].plot(epochs, train_ssim, label='Train SSIM', color='purple', linewidth=2)
-    axes[2].plot(epochs, val_ssim, label='Val SSIM', color='brown', linewidth=2)
-    axes[2].set_title('SSIM (Higher is better)')
-    axes[2].set_xlabel('Epoch')
-    axes[2].set_ylabel('Index')
-    axes[2].legend()
-    axes[2].grid(True, linestyle='--', alpha=0.7)
-    
-    plt.tight_layout()
-    plt.savefig(save_path, dpi=150)
-    plt.close(fig)
 
 
 def main():
@@ -356,19 +242,15 @@ def main():
     # Model, optimizer, scheduler, loss
     # ------------------------------------------------------------------
     model = UNet(in_channels=3, out_channels=3, base_channels=64).to(device)
-    discriminator = PatchDiscriminator().to(device)
-    print(f"Generator parameters: {count_parameters(model):,}")
-    print(f"Discriminator parameters: {count_parameters(discriminator):,}")
+    print(f"Model parameters: {count_parameters(model):,}")
 
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
-    optimizer_D = optim.Adam(discriminator.parameters(), lr=args.lr)
 
     # CosineAnnealingLR smoothly reduces the learning rate to near zero
+    # over the full training run, which prevents oscillation late in training.
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs)
-    scheduler_D = optim.lr_scheduler.CosineAnnealingLR(optimizer_D, T_max=args.epochs)
 
     perceptual_fn = PerceptualLoss(device=device)
-    gan_loss_fn = GANLoss(use_lsgan=True).to(device)
 
     # ------------------------------------------------------------------
     # Resume from checkpoint (optional)
@@ -377,7 +259,7 @@ def main():
     best_val_loss = float("inf")
 
     if args.resume:
-        start_epoch, best_val_loss = load_checkpoint(args.resume, model, optimizer, scheduler, device, discriminator, optimizer_D, scheduler_D)
+        start_epoch, best_val_loss = load_checkpoint(args.resume, model, optimizer, scheduler, device)
 
     # ------------------------------------------------------------------
     # Training loop
@@ -397,21 +279,19 @@ def main():
 
     for epoch in range(start_epoch, args.epochs + 1):
         # Train
-        train_metrics = train_one_epoch(model, discriminator, train_loader, optimizer, optimizer_D, perceptual_fn, gan_loss_fn, device, epoch)
+        train_metrics = train_one_epoch(model, train_loader, optimizer, perceptual_fn, device, epoch)
 
         # Validate
         val_metrics = validate(model, val_loader, perceptual_fn, device)
 
         # Advance learning rate schedule
         scheduler.step()
-        scheduler_D.step()
 
         # Log epoch summary to stdout
         lr = optimizer.param_groups[0]["lr"]
         print(
             f"Epoch {epoch:03d}/{args.epochs} | "
-            f"G loss: {train_metrics['loss']:.4f} | "
-            f"D loss: {train_metrics['d_loss']:.4f} | "
+            f"Train loss: {train_metrics['loss']:.4f} | "
             f"Val loss: {val_metrics['loss']:.4f} | "
             f"Val PSNR: {val_metrics['psnr']:.2f} dB | "
             f"Val SSIM: {val_metrics['ssim']:.4f} | "
@@ -435,18 +315,15 @@ def main():
                 "lr": f"{lr:.2e}",
             })
 
-        # Update learning curves plot
-        plot_learning_curves(str(csv_path), str(results_dir / "learning_curves.png"))
-
         # Always save the latest checkpoint (overwrite previous)
         save_checkpoint(model, optimizer, scheduler, epoch, val_metrics["loss"], best_val_loss,
-                        str(checkpoints_dir / "last.pth"), discriminator, optimizer_D, scheduler_D)
+                        str(checkpoints_dir / "last.pth"))
 
         # Save the best checkpoint when validation loss improves
         if val_metrics["loss"] < best_val_loss:
             best_val_loss = val_metrics["loss"]
             save_checkpoint(model, optimizer, scheduler, epoch, val_metrics["loss"], best_val_loss,
-                            str(checkpoints_dir / "best.pth"), discriminator, optimizer_D, scheduler_D)
+                            str(checkpoints_dir / "best.pth"))
             print(f"  ✓ New best model saved (val_loss={best_val_loss:.4f})")
 
         # Save visual comparison grid every N epochs
