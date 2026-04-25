@@ -140,25 +140,7 @@ class FiveKDataset(Dataset):
             input_img = crop(input_img)
             target_img = crop(target_img)
 
-        input_tensor = to_tensor(input_img)
-        target_tensor = to_tensor(target_img)
-
-        if self.split == "train" and torch.rand(1).item() < 0.5:
-            # Add synthetic Chromatic Aberration (RGB halo) to the training inputs.
-            # By randomly shifting the green channel spatial pixels, the model learns 
-            # to ignore color fringes instead of mistaking them for physical green objects.
-            shift_x = torch.randint(-3, 4, (1,)).item()
-            shift_y = torch.randint(-3, 4, (1,)).item()
-            input_tensor[1] = torch.roll(input_tensor[1], shifts=(shift_y, shift_x), dims=(0, 1))
-
-        # Add a warm, nostalgic (yellow) tint to ALL targets.
-        # Yellow is achieved by increasing Red/Green and lowering Blue.
-        # Training the network mapped to these targets permanently biases its style.
-        target_tensor[0] = torch.clamp(target_tensor[0] * 1.10, 0.0, 1.0)  # Boost Red 10%
-        target_tensor[1] = torch.clamp(target_tensor[1] * 1.05, 0.0, 1.0)  # Boost Green 5%
-        target_tensor[2] = target_tensor[2] * 0.85                         # Drop Blue 15%
-        
-        return input_tensor, target_tensor
+        return to_tensor(input_img), to_tensor(target_img)
 
 
 # ---------------------------------------------------------------------------

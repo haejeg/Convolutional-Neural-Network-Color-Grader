@@ -155,29 +155,12 @@ class UNet(nn.Module):
         x = self.dec2(x, s2)
         x = self.dec1(x, s1)
 
-        # ---------------------------------------------------------
-        # GLOBAL FILTER UPGRADE:
-        # Instead of predicting a localized parameter for every pixel, we collapse 
-        # the network's understanding into a single global set of parameters!
-        # This acts EXACTLY like a Lightroom preset or color filter applied 
-        # to the whole photo uniformly.
-        # ---------------------------------------------------------
-        x_global = torch.mean(x, dim=(2, 3), keepdim=True)  # Pool spatial dims -> shape (B, C, 1, 1)
+        # Project to output channels, apply tanh to bound output to [-1, 1]
+        correction = torch.tanh(self.final_conv(x))
 
-        # Project to just 3 curve parameters (R, G, B) for the ENTIRE image
-        global_curve_params = torch.tanh(self.final_conv(x_global))
-
-        # Because `global_curve_params` is exactly the same for every pixel, 
-        # it is physically and mathematically impossible for color to bleed 
-        # across spatial boundaries! No more green trees bleeding into skies.
-        x_01 = (raw_input + 1.0) / 2.0
-        
-        # Apply the RGB curves
-        for _ in range(3):
-            x_01 = x_01 + global_curve_params * x_01 * (1.0 - x_01)
-            
-        # Convert back
-        output = torch.clamp((x_01 * 2.0) - 1.0, -1.0, 1.0)
+        # Residual: add correction to raw input and clamp to valid range.
+        # The network only has to learn what to *change*, not the full image.
+        output = torch.clamp(raw_input + correction, -1.0, 1.0)
         return output
 
 
