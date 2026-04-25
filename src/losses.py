@@ -1,7 +1,7 @@
-# losses.py - Loss Function Definitions
-# 
-# This module defines the objective functions used to train the neural network.
-# It includes perceptual loss (VGG), color difference loss (CIELAB), and adversarial loss (GAN).
+# L1 Loss & Perceptual Loss used here, a loss function used to generate high quality pioctures by comparing high level features
+# extracted from a pre trained network (VGG16 here). Rather than comparing pixel by pixel like L1, compares feature maps.abs
+# Total loss = 0.5 * L1_loss + 0.1 * perceptual_loss
+# 0.1 to make output look more natural than it would be with just L1 loss.
 
 import torch
 import torch.nn as nn
@@ -11,77 +11,79 @@ from torchvision.models import VGG16_Weights
 
 
 class PerceptualLoss(nn.Module):
-    """
-    Computes perceptual similarity using pre-trained VGG16 feature maps.
-    
-    Instead of comparing pixel differences (which misalign easily), this compares the abstract 
-    features of the generated and target images. It extracts features from the early and middle 
-    layers of VGG16 to compare low-level edges/textures and mid-level structures.
-    """
+    # Computes perceptual similarity through VGG16 layers
+    # relu2_2 captures low-level detail (edges, fine textures)
+    # relu3_3 captures mid-level structure (object parts, color blobs)
+    # The VGG network is frozen — we never update its weights. We are only
+    # using it as a fixed feature extractor!!
 
-    # ImageNet normalization statistics required for VGG inputs
+    # ImageNet normalization that VGG expects
     _VGG_MEAN = torch.tensor([0.485, 0.456, 0.406])
     _VGG_STD = torch.tensor([0.229, 0.224, 0.225])
 
     def __init__(self, device: torch.device):
         super().__init__()
 
+        # Load pre-trained VGG16 (downloads weights once on first run) 
         vgg = models.vgg16(weights=VGG16_Weights.IMAGENET1K_V1).features
 
-        # Layer 9 corresponds to relu2_2 (low-level textures)
-        self.slice1 = nn.Sequential(*list(vgg.children())[:9])   
-        # Layer 16 corresponds to relu3_3 (mid-level structures)
-        self.slice2 = nn.Sequential(*list(vgg.children())[9:16]) 
+        # We only need the first 16 layers to reach relu3_3
+        # VGG16 feature layer indices: relu2_2 = layer 9, relu3_3 = layer 16
+        self.slice1 = nn.Sequential(*list(vgg.children())[:9])   # up to relu2_2
+        self.slice2 = nn.Sequential(*list(vgg.children())[9:16]) # up to relu3_3
 
-        # Freeze the VGG parameters as we are only using it for feature extraction
+        # Freeze all VGG parameters — we never want to update them
         for param in self.parameters():
             param.requires_grad = False
 
-        # Register tensors as buffers to handle device placement automatically
+        # Register mean/std as buffers so they move to the correct device
+        # automatically when we call .to(device)
         self.register_buffer("vgg_mean", self._VGG_MEAN.view(1, 3, 1, 1))
         self.register_buffer("vgg_std", self._VGG_STD.view(1, 3, 1, 1))
 
         self.to(device)
 
     def _normalize_for_vgg(self, x: torch.Tensor) -> torch.Tensor:
-        # Convert from [-1, 1] input range to [0, 1] range, then apply ImageNet normalization
-        x = (x + 1.0) / 2.0                       
-        x = (x - self.vgg_mean) / self.vgg_std     
+        # [-1, 1] -> [0, 1] -> ImageNet range
+        x = (x + 1.0) / 2.0                       # [-1,1] → [0,1]
+        x = (x - self.vgg_mean) / self.vgg_std     # [0,1] → ImageNet range
         return x
 
     def forward(self, pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        # Takes in pred and target images (outputs of network and ground truth)
+        # Returns perceptual loss
+
         pred_vgg = self._normalize_for_vgg(pred)
         target_vgg = self._normalize_for_vgg(target)
 
+        # Extract features at relu2_2
         pred_f1 = self.slice1(pred_vgg)
         target_f1 = self.slice1(target_vgg)
 
+        # Extract features at relu3_3 (continuing from relu2_2 output)
         pred_f2 = self.slice2(pred_f1)
         target_f2 = self.slice2(target_f1)
 
-        # Compute L1 distance between the extracted feature maps
+        # L1 distance in feature space at both layers
         loss = F.l1_loss(pred_f1, target_f1) + F.l1_loss(pred_f2, target_f2)
         return loss
 
 
 def rgb_to_lab(image: torch.Tensor) -> torch.Tensor:
-    """
-    Differentiable conversion from RGB to CIELAB color space.
-    
-    CIELAB is perceptually uniform, meaning the Euclidean distance between two colors 
-    in LAB space closely approximates human visual perception of color difference.
-    """
+    # Convert [-1, 1] RGB to CIELAB space in a differentiable way.
     device = image.device
     
+    # 1. [-1, 1] -> [0, 1]
     image = (image + 1.0) / 2.0
     image = torch.clamp(image, 0.0, 1.0)
     
-    # Inverse sRGB gamma correction to linear light
+    # 2. Inverse sRGB gamma correction
     mask = (image > 0.04045).type_as(image)
+    # Add epsilon to prevent NaNs in pow gradient
     base = torch.clamp((image + 0.055) / 1.055, min=1e-5)
     image_linear = mask * torch.pow(base, 2.4) + (1.0 - mask) * image / 12.92
     
-    # Linear sRGB to XYZ transform matrix
+    # 3. sRGB to XYZ matrix
     matrix = torch.tensor([
         [0.4124564, 0.3575761, 0.1804375],
         [0.2126729, 0.7151522, 0.0721750],
@@ -93,11 +95,11 @@ def rgb_to_lab(image: torch.Tensor) -> torch.Tensor:
     xyz = torch.bmm(matrix.unsqueeze(0).expand(B, -1, -1), image_flat)
     xyz = xyz.view(B, 3, H, W)
     
-    # Normalize by D65 illuminant white point
+    # 4. Normalize by D65 white point
     white_point = torch.tensor([0.95047, 1.00000, 1.08883], device=device, dtype=image.dtype).view(1, 3, 1, 1)
     xyz = xyz / white_point
     
-    # Convert XYZ to LAB
+    # 5. XYZ to LAB
     mask = (xyz > 0.008856).type_as(xyz)
     base_xyz = torch.clamp(xyz, min=1e-5)
     f_xyz = mask * torch.pow(base_xyz, 1.0/3.0) + (1.0 - mask) * (7.787 * xyz + 16.0 / 116.0)
@@ -110,9 +112,9 @@ def rgb_to_lab(image: torch.Tensor) -> torch.Tensor:
 
 
 def cielab_loss(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-    """Computes the L1 distance between predictions and targets in CIELAB color space."""
     pred_lab = rgb_to_lab(pred)
     target_lab = rgb_to_lab(target)
+    # L1 distance in LAB space approximates Delta E
     return F.l1_loss(pred_lab, target_lab)
 
 
@@ -124,10 +126,19 @@ def combined_loss(
     cielab_weight: float = 0.5,
     perceptual_weight: float = 0.1,
 ) -> tuple[torch.Tensor, dict]:
-    """
-    Computes a weighted sum of spatial L1, perceptual CIELAB, and VGG feature losses.
-    Returns the total scalar loss along with a dictionary of the individual components.
-    """
+    # Compute the combined L1 + perceptual loss.
+
+    # args:
+    #    pred:               Predicted image, shape (B, 3, H, W), range [-1, 1]
+    #    target:             Ground truth,   shape (B, 3, H, W), range [-1, 1]
+    #    perceptual_loss_fn: An instance of PerceptualLoss.
+    #    l1_weight:          Weight for the pixel-level L1 loss (default 1.0).
+    #    perceptual_weight:  Weight for the perceptual loss (default 0.1).
+
+    # Returns:
+    #    total_loss: Scalar tensor to call .backward() on.
+    #    components: Dict with individual loss values for logging.
+
     l1 = F.l1_loss(pred, target)
     cielab = cielab_loss(pred, target)
     perceptual = perceptual_loss_fn(pred, target)
@@ -143,23 +154,18 @@ def combined_loss(
 
 
 class GANLoss(nn.Module):
-    """
-    Calculates the adversarial loss for GAN training.
-    
-    Defaults to Least Squares GAN (LSGAN) using MSELoss, which typically exhibits
-    greater training stability than the standard BCE formulation.
-    """
+    # Gan Loss here (LSGAN or vanilla GAN)
     def __init__(self, use_lsgan: bool = True):
         super().__init__()
         self.register_buffer('real_label', torch.tensor(1.0))
         self.register_buffer('fake_label', torch.tensor(0.0))
-        
         if use_lsgan:
             self.loss = nn.MSELoss()
         else:
             self.loss = nn.BCEWithLogitsLoss()
 
     def get_target_tensor(self, prediction: torch.Tensor, target_is_real: bool) -> torch.Tensor:
+        # Create label tensors with the same size as the input prediction.
         if target_is_real:
             target_tensor = self.real_label
         else:
@@ -171,6 +177,10 @@ class GANLoss(nn.Module):
         return self.loss(prediction, target_tensor)
 
 
+# ---------------------------------------------------------------------------
+# Quick test — run this file directly to verify the loss works:
+#   python src/losses.py
+# ---------------------------------------------------------------------------
 if __name__ == "__main__":
     device = (
         torch.device("mps") if torch.backends.mps.is_available()
@@ -181,6 +191,7 @@ if __name__ == "__main__":
 
     perceptual_fn = PerceptualLoss(device=device)
 
+    # Two random "images" in [-1, 1] range
     pred = torch.randn(2, 3, 384, 384, device=device)
     target = torch.randn(2, 3, 384, 384, device=device)
 

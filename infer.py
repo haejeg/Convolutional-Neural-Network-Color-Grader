@@ -1,12 +1,22 @@
 """
-infer.py — Inference script for running the trained model on new images.
-
-Loads a saved model checkpoint and applies the retouching network to the provided images. 
-Handles required padding since the U-Net architecture requires spatial dimensions to be 
-divisible by 16.
+infer.py — Run the trained U-Net model on new images.
 
 HOW TO USE:
+  # Retouch an image inside the 'Input' folder (outputs to 'results'):
   python infer.py photo.jpg
+
+  # Retouch all images in the 'Input' folder:
+  python infer.py
+
+  # Use a specific output folder and checkpoint:
+  python infer.py photo.jpg --output other_results/ --checkpoint checkpoints/last.pth
+
+The model was trained on 384x384 crops, but at inference we want to process
+the full image at its original resolution. We do this by:
+  1. Padding the image dimensions up to the nearest multiple of 16
+     (because the network downsamples 4 times, each by factor 2: 2^4 = 16)
+  2. Running the model
+  3. Cropping the output back to the original image size
 """
 
 import argparse
@@ -38,7 +48,16 @@ def parse_args():
 
 
 def load_model(checkpoint_path: str, device: torch.device) -> UNet:
-    """Loads the model and checkpoint for inference."""
+    """
+    Load the U-Net model from a saved checkpoint.
+
+    Args:
+        checkpoint_path: Path to the .pth file saved during training.
+        device:          Device to load the model onto.
+
+    Returns:
+        The model in evaluation mode, ready for inference.
+    """
     if not Path(checkpoint_path).exists():
         raise FileNotFoundError(
             f"Checkpoint not found: {checkpoint_path}\n"
@@ -49,7 +68,9 @@ def load_model(checkpoint_path: str, device: torch.device) -> UNet:
     checkpoint = torch.load(checkpoint_path, map_location=device)
     model.load_state_dict(checkpoint["model_state_dict"])
 
-    # Set evaluation mode to disable operations like dropout and batch normalization updates
+    # eval() switches BatchNorm and Dropout to inference mode.
+    # Forgetting this causes BatchNorm to use batch statistics instead of
+    # the running statistics computed during training, giving wrong results.
     model.eval()
     model.to(device)
 
@@ -61,29 +82,45 @@ def load_model(checkpoint_path: str, device: torch.device) -> UNet:
 
 def pad_to_multiple(tensor: torch.Tensor, multiple: int = 16):
     """
-    Pads tensor spatial dimensions to the nearest target multiple.
-    This ensures compatibility with the U-Net architecture downsampling/upsampling factors.
+    Pad a tensor's spatial dimensions to the nearest multiple of `multiple`.
+
+    The U-Net downsamples 4 times (each by 2), so input spatial dimensions
+    must be divisible by 2^4 = 16. Images that aren't exactly divisible
+    will fail unless we pad them first.
+
+    Returns:
+        padded_tensor: The padded tensor.
+        (pad_h, pad_w): How much padding was added, so we can crop it off after.
     """
     _, _, h, w = tensor.shape
-    
     pad_h = (multiple - h % multiple) % multiple
     pad_w = (multiple - w % multiple) % multiple
 
     if pad_h > 0 or pad_w > 0:
+        # Pad on the right and bottom sides (easier to crop off cleanly)
         tensor = torch.nn.functional.pad(tensor, (0, pad_w, 0, pad_h), mode="reflect")
 
     return tensor, (pad_h, pad_w)
 
 
 def preprocess_image(image_path: str, device: torch.device) -> tuple:
-    """Loads image data and transforms it into the format expected by the model."""
+    """
+    Load and preprocess an image for model inference.
+
+    Returns:
+        tensor:        Shape (1, 3, H_padded, W_padded), normalized to [-1, 1]
+        original_size: (H_original, W_original) for cropping output back
+        padding:       (pad_h, pad_w) added during padding
+    """
     img = Image.open(image_path).convert("RGB")
     original_size = (img.height, img.width)
 
+    # Convert PIL → float tensor [0, 1] → normalize to [-1, 1]
     to_tensor = transforms.ToTensor()
     normalize = transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
-    tensor = normalize(to_tensor(img)).unsqueeze(0) 
+    tensor = normalize(to_tensor(img)).unsqueeze(0)  # add batch dimension
 
+    # Pad spatial dims to multiples of 16
     tensor, padding = pad_to_multiple(tensor, multiple=16)
     tensor = tensor.to(device)
 
@@ -91,22 +128,43 @@ def preprocess_image(image_path: str, device: torch.device) -> tuple:
 
 
 def postprocess_tensor(tensor: torch.Tensor, original_size: tuple) -> Image.Image:
-    """Converts the model output tensor back into a PIL Image and crops padding."""
-    tensor = tensor.squeeze(0) 
+    """
+    Convert model output back to a PIL Image at the original resolution.
 
+    Args:
+        tensor:        Shape (1, 3, H_padded, W_padded), range [-1, 1]
+        original_size: (H_original, W_original) — used to crop off padding
+
+    Returns:
+        PIL Image in RGB mode.
+    """
+    tensor = tensor.squeeze(0)  # remove batch dimension → (3, H_padded, W_padded)
+
+    # Crop back to original size — padding was added on right/bottom so this is clean
     h_orig, w_orig = original_size
     tensor = tensor[:, :h_orig, :w_orig]
 
     return tensor_to_pil(tensor)
 
 
-@torch.no_grad() 
+@torch.no_grad()
 def retouch_image(model: UNet, image_path: str, output_path: str, device: torch.device):
-    """Performs inference on a single image and saves the result."""
+    """
+    Load one image, run the model, and save the retouched result.
+
+    Args:
+        model:       Trained U-Net in eval mode.
+        image_path:  Path to the input image.
+        output_path: Where to save the retouched output.
+        device:      Torch device.
+    """
     print(f"  Processing: {Path(image_path).name}")
 
     tensor, original_size, padding = preprocess_image(image_path, device)
+
+    # Run the model — no_grad() is set by the calling context (the decorator above)
     pred = model(tensor)
+
     result_img = postprocess_tensor(pred, original_size)
 
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
@@ -117,6 +175,7 @@ def retouch_image(model: UNet, image_path: str, output_path: str, device: torch.
 def main():
     args = parse_args()
 
+    # Determine device
     if args.device:
         device = torch.device(args.device)
         print(f"Using device: {device} (from --device flag)")
@@ -133,12 +192,16 @@ def main():
         elif not input_path.exists() and not input_path.is_absolute():
             input_path = Path("Input") / input_given
     else:
+        # Default to processing the whole 'Input' directory
         input_path = Path("Input")
 
     output_path = Path(args.output)
+
+    # Supported image formats
     image_extensions = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp"}
 
     if input_path.is_dir():
+        # Process all images in the directory
         image_files = [p for p in sorted(input_path.iterdir())
                        if p.suffix.lower() in image_extensions]
 
@@ -156,11 +219,13 @@ def main():
         print(f"\nDone. {len(image_files)} images saved to {output_path}/")
 
     elif input_path.is_file():
+        # Process a single image
         if input_path.suffix.lower() not in image_extensions:
             print(f"Unsupported file type: {input_path.suffix}")
             print(f"Supported: {', '.join(image_extensions)}")
             sys.exit(1)
 
+        # If output is a directory, use the input filename inside it
         if output_path.is_dir() or not output_path.suffix:
             output_path = output_path / input_path.name
 
